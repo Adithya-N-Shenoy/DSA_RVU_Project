@@ -1,0 +1,150 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_FLIGHTS 5
+#define MAX_SEATS 10
+
+typedef struct Booking {
+    int bookingID;
+    char passengerName[50];
+    int flightNo;
+    struct Booking* next;
+} Booking;
+
+Booking* head = NULL;
+int bookingCounter = 1;
+
+// Flight structure
+typedef struct {
+    int flightNo;
+    char destination[30];
+    int availableSeats;
+} Flight;
+
+Flight flights[MAX_FLIGHTS] = {
+    {101, "Delhi", MAX_SEATS},
+    {102, "Mumbai", MAX_SEATS},
+    {103, "Chennai", MAX_SEATS},
+    {104, "Kolkata", MAX_SEATS},
+    {105, "Bangalore", MAX_SEATS}
+};
+
+// Function to display available flights
+void displayFlights() {
+    printf("\nAvailable Flights:\n");
+    printf("Flight No\tDestination\tAvailable Seats\n");
+    for (int i = 0; i < MAX_FLIGHTS; i++) {
+        printf("%d\t\t%s\t\t%d\n", flights[i].flightNo,
+               flights[i].destination, flights[i].availableSeats);
+    }
+}
+
+// Function to book a ticket
+void bookTicket() {
+    char name[50];
+    int flightNo, i, found = 0;
+
+    printf("Enter passenger name: ");
+    scanf(" %[^\n]", name);
+    displayFlights();
+    printf("Enter flight number to book: ");
+    scanf("%d", &flightNo);
+
+    for (i = 0; i < MAX_FLIGHTS; i++) {
+        if (flights[i].flightNo == flightNo) {
+            if (flights[i].availableSeats > 0) {
+                Booking* newBooking = (Booking*)malloc(sizeof(Booking));
+                newBooking->bookingID = bookingCounter++;
+                strcpy(newBooking->passengerName, name);
+                newBooking->flightNo = flightNo;
+                newBooking->next = head;
+                head = newBooking;
+                flights[i].availableSeats--;
+
+                printf("Booking successful! Booking ID: %d\n", newBooking->bookingID);
+            } else {
+                printf("No seats available on this flight.\n");
+            }
+            found = 1;
+            break;
+        }
+    }
+
+    if (!found) {
+        printf("Invalid flight number.\n");
+    }
+}
+
+// Function to cancel a ticket
+void cancelTicket() {
+    int bookingID;
+    printf("Enter Booking ID to cancel: ");
+    scanf("%d", &bookingID);
+
+    Booking *temp = head, *prev = NULL;
+
+    while (temp != NULL) {
+        if (temp->bookingID == bookingID) {
+            if (prev == NULL)
+                head = temp->next;
+            else
+                prev->next = temp->next;
+
+            for (int i = 0; i < MAX_FLIGHTS; i++) {
+                if (flights[i].flightNo == temp->flightNo) {
+                    flights[i].availableSeats++;
+                    break;
+                }
+            }
+
+            printf("Booking with ID %d cancelled.\n", bookingID);
+            free(temp);
+            return;
+        }
+        prev = temp;
+        temp = temp->next;
+    }
+
+    printf("Booking ID not found.\n");
+}
+
+// Function to display all bookings
+void displayBookings() {
+    Booking* temp = head;
+    if (temp == NULL) {
+        printf("No bookings found.\n");
+        return;
+    }
+
+    printf("\nCurrent Bookings:\n");
+    printf("Booking ID\tPassenger Name\tFlight No\n");
+    while (temp != NULL) {
+        printf("%d\t\t%s\t\t%d\n", temp->bookingID, temp->passengerName,
+               temp->flightNo);
+        temp = temp->next;
+    }
+}
+
+// Main menu
+int main() {
+    int choice;
+
+    do {
+        printf("\n--- Airline Reservation System ---\n");
+        printf("1. View Flights\n2. Book Ticket\n3. Cancel Booking\n4. Show Bookings\n5. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1: displayFlights(); break;
+            case 2: bookTicket(); break;
+            case 3: cancelTicket(); break;
+            case 4: displayBookings(); break;
+            case 5: printf("Exiting...\n"); break;
+            default: printf("Invalid choice!\n");
+        }
+    } while (choice != 5);
+
+    return 0;
+}
