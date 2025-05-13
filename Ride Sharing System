@@ -1,0 +1,149 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Driver node
+typedef struct Driver {
+    int driverID;
+    char name[50];
+    struct Driver* next;
+} Driver;
+
+Driver* driverHead = NULL; // Linked List for drivers
+
+// Rider queue
+typedef struct Rider {
+    int riderID;
+    char name[50];
+    struct Rider* next;
+} Rider;
+
+Rider* front = NULL, *rear = NULL;
+int riderCounter = 1, driverCounter = 1;
+
+// Add driver to the available list
+void addDriver() {
+    Driver* newDriver = (Driver*)malloc(sizeof(Driver));
+    newDriver->driverID = driverCounter++;
+    printf("Enter driver name: ");
+    scanf(" %[^\n]", newDriver->name);
+    newDriver->next = driverHead;
+    driverHead = newDriver;
+    printf("Driver added with ID: %d\n", newDriver->driverID);
+}
+
+// Request a ride
+void requestRide() {
+    Rider* newRider = (Rider*)malloc(sizeof(Rider));
+    newRider->riderID = riderCounter++;
+    printf("Enter rider name: ");
+    scanf(" %[^\n]", newRider->name);
+    newRider->next = NULL;
+
+    if (rear == NULL) {
+        front = rear = newRider;
+    } else {
+        rear->next = newRider;
+        rear = newRider;
+    }
+
+    printf("Ride requested! Rider ID: %d\n", newRider->riderID);
+}
+
+// Assign ride
+void assignRide() {
+    if (front == NULL) {
+        printf("No ride requests in queue.\n");
+        return;
+    }
+
+    if (driverHead == NULL) {
+        printf("No drivers available at the moment.\n");
+        return;
+    }
+
+    Rider* rider = front;
+    Driver* driver = driverHead;
+
+    printf("Assigned Driver %s (ID: %d) to Rider %s (ID: %d)\n",
+           driver->name, driver->driverID, rider->name, rider->riderID);
+
+    // Remove assigned driver
+    driverHead = driverHead->next;
+    free(driver);
+
+    // Remove assigned rider
+    front = front->next;
+    if (front == NULL) rear = NULL;
+    free(rider);
+}
+
+// Cancel a ride request
+void cancelRide() {
+    if (front == NULL) {
+        printf("No ride requests to cancel.\n");
+        return;
+    }
+
+    Rider* temp = front;
+    front = front->next;
+    if (front == NULL) rear = NULL;
+
+    printf("Cancelled ride request of Rider %s (ID: %d)\n", temp->name, temp->riderID);
+    free(temp);
+}
+
+// Display all riders in queue
+void displayRiders() {
+    if (front == NULL) {
+        printf("No riders in queue.\n");
+        return;
+    }
+
+    Rider* temp = front;
+    printf("Current Ride Queue:\n");
+    while (temp != NULL) {
+        printf("Rider: %s (ID: %d)\n", temp->name, temp->riderID);
+        temp = temp->next;
+    }
+}
+
+// Display all available drivers
+void displayDrivers() {
+    if (driverHead == NULL) {
+        printf("No drivers available.\n");
+        return;
+    }
+
+    Driver* temp = driverHead;
+    printf("\nAvailable Drivers:\n");
+    while (temp != NULL) {
+        printf("Driver: %s (ID: %d)\n", temp->name, temp->driverID);
+        temp = temp->next;
+    }
+}
+
+// Menu
+int main() {
+    int choice;
+    do {
+        printf("\n--- Ride Sharing System ---\n");
+        printf("1. Add Driver\n2. Request Ride\n3. Assign Ride\n");
+        printf("4. Cancel Ride\n5. Show Riders\n6. Show Drivers\n7. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1: addDriver(); break;
+            case 2: requestRide(); break;
+            case 3: assignRide(); break;
+            case 4: cancelRide(); break;
+            case 5: displayRiders(); break;
+            case 6: displayDrivers(); break;
+            case 7: printf("Exiting...\n"); break;
+            default: printf("Invalid choice!\n");
+        }
+    } while (choice != 7);
+
+    return 0;
+}
