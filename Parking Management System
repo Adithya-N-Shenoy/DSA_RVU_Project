@@ -1,0 +1,99 @@
+#include <stdio.h>
+#include <string.h>
+
+#define MAX 100
+
+typedef struct {
+    char vehicleNumber[15];
+    int entryTime;
+} Vehicle;
+
+Vehicle parkingLot[MAX];
+int top = -1;
+
+void parkVehicle(Vehicle v) {
+    if (top == MAX - 1) {
+        printf("Parking lot is full.\n");
+        return;
+    }
+    top++;
+    parkingLot[top] = v;
+    printf("Vehicle %s parked at position %d.\n", v.vehicleNumber, top + 1);
+}
+
+void removeLastVehicle() {
+    if (top == -1) {
+        printf("Parking lot is empty.\n");
+        return;
+    }
+    printf("Vehicle %s removed from position %d.\n", parkingLot[top].vehicleNumber, top + 1);
+    top--;
+}
+
+void displayParkingLot() {
+    if (top == -1) {
+        printf("Parking lot is empty.\n");
+        return;
+    }
+    printf("\nList of Parked Vehicles:\n");
+    printf("----------------------------\n");
+    for (int i = top; i >= 0; i--) {
+        printf("Slot %d: %s (Entry Time: %d)\n", i + 1, parkingLot[i].vehicleNumber, parkingLot[i].entryTime);
+    }
+    printf("----------------------------\n");
+}
+
+int main() {
+    int choice;
+    Vehicle v;
+
+    printf("=========== PARKING LOT MANAGEMENT SYSTEM ===========\n");
+
+    do {
+        printf("\nMenu:\n");
+        printf("1. Park Vehicle\n");
+        printf("2. Remove Last Parked Vehicle\n");
+        printf("3. Display Parked Vehicles\n");
+        printf("4. Exit\n");
+        printf("Enter your choice: ");
+        if (scanf("%d", &choice) != 1) {
+            printf("Invalid input. Exiting.\n");
+            break;
+        }
+
+        switch (choice) {
+            case 1:
+                printf("Enter vehicle number: ");
+                if (scanf("%s", v.vehicleNumber) != 1) {
+                    printf("Invalid vehicle number. Exiting.\n");
+                    return 1;
+                }
+
+                printf("Enter entry time (as integer): ");
+                if (scanf("%d", &v.entryTime) != 1) {
+                    printf("Invalid entry time. Exiting.\n");
+                    return 1;
+                }
+
+                parkVehicle(v);
+                break;
+
+            case 2:
+                removeLastVehicle();
+                break;
+
+            case 3:
+                displayParkingLot();
+                break;
+
+            case 4:
+                printf("Exiting Parking Lot System.\n");
+                break;
+
+            default:
+                printf("Invalid choice. Please try again.\n");
+        }
+    } while (choice != 4);
+
+    return 0;
+}
